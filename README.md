@@ -84,7 +84,7 @@ This will:
 
 ## License
 
-[MIT](LICENSE)
+[License](LICENSE)
 
 ## Contact
 
