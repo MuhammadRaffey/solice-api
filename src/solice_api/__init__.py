@@ -28,23 +28,25 @@ async def main():
     
     with open(inverter_list_path, "r") as infile:
         inverter_data = json.load(infile)
-    
+
+    # Support both dict with 'records' or plain list
     if isinstance(inverter_data, dict) and "records" in inverter_data:
-        record = inverter_data["records"][0]
+        records = inverter_data["records"]
     elif isinstance(inverter_data, list):
-        record = inverter_data[0]
+        records = inverter_data
     else:
         raise ValueError("Unexpected structure in inverter_list.json")
-    
-    inverter_id = record.get("id")
-    if not inverter_id:
-        raise ValueError("Inverter record does not contain required 'id'")
-    
-    detail = await get_inverter_detail(api_key, api_secret, inverter_id)
-    
-    with open(inverter_detail_path, "w") as outfile:
-        json.dump(detail, outfile, indent=2)
-    print(f"Inverter detail saved to {inverter_detail_path}")
+
+    for idx, record in enumerate(records, start=1):
+        inverter_id = record.get("id")
+        if not inverter_id:
+            print(f"Skipping record {idx} without 'id'")
+            continue
+        detail = await get_inverter_detail(api_key, api_secret, inverter_id)
+        detail_path = os.path.join(data_dir, f"{idx}.json")
+        with open(detail_path, "w") as outfile:
+            json.dump(detail, outfile, indent=2)
+        print(f"Inverter detail for inverter {inverter_id} saved to {detail_path}")
 
 def run_main():
     """Entry point for the package. Runs the main async function."""

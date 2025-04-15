@@ -66,14 +66,21 @@ This will:
 
 1. Connect to the SolisCloud API
 2. Retrieve your inverter list
-3. Get detailed information about your first inverter
-4. Save the data to JSON files in the `data` directory
+3. For each inverter, fetch detailed information
+4. Save each inverter's detail to a separate file (`1.json`, `2.json`, etc.) in the `data` directory
+
+#### Notes
+- Each inverter's detail is saved as a separate file for easy access and analysis.
+- Files are named sequentially (`1.json`, `2.json`, ...) corresponding to the order in your inverter list. For better traceability, you may modify the code to use the inverter's serial number or ID as the filename.
+- If there is an API error or a particular inverter's detail cannot be fetched, the script will skip that inverter and continue processing the rest.
 
 ## Project Structure
 
 - `src/solice_api/main.py`: Core API functions
 - `src/solice_api/__init__.py`: Package initialization and main runner function
 - `data/`: Directory where inverter data is stored (created automatically)
+  - `inverter_list.json`: List of all inverters
+  - `1.json`, `2.json`, ...: Detail files for each inverter
 - `config.json`: Configuration file for API credentials
 
 ## Dependencies
