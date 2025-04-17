@@ -70,6 +70,7 @@ This will:
 4. Save each inverter's detail to a separate file (`1.json`, `2.json`, etc.) in the `data` directory
 
 #### Notes
+
 - Each inverter's detail is saved as a separate file for easy access and analysis.
 - Files are named sequentially (`1.json`, `2.json`, ...) corresponding to the order in your inverter list. For better traceability, you may modify the code to use the inverter's serial number or ID as the filename.
 - If there is an API error or a particular inverter's detail cannot be fetched, the script will skip that inverter and continue processing the rest.
