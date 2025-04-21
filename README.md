@@ -8,132 +8,125 @@
 
 ```text
 .
-├── src/
-│   └── solice_api/               # Core Python package: API client and data-fetch script
+├── src/solice_api/               # Core Python package (API client & data-fetch logic)
 ├── exporter.py                   # JSON → Prometheus exporter (polls data/*.json)
-├── solis-grafana-dashboard.json  # Grafana dashboard model for import
-├── docker-compose.yml            # Docker Compose stack: exporter, Prometheus, Grafana
+├── config.example.json           # Example SolisCloud API credentials file
 ├── prometheus.yml                # Prometheus scrape configuration
-├── pyproject.toml                # Project metadata, dependencies, and CLI scripts
-├── .python-version               # Python version for pyenv/uv
-├── .gitignore                    # Git ignore rules
-├── uv.lock                       # UV CLI lock file
+├── docker-compose.yml            # Docker Compose stack (exporter, Prometheus, Grafana)
+├── solis-grafana-dashboard.json  # Provisioned Grafana dashboard JSON
 ├── data/                         # Directory for Solis JSON snapshots
-│   └── *.json                    # Raw inverter detail files (read‑only)
-├── README.md                     # This document
-└── LICENSE                       # MIT License
+│   └── *.json                    # Raw inverter detail files
+├── pyproject.toml                # Python project metadata & dependencies
+├── uv.lock                       # Dependency lock file for UV
+└── README.md                     # This document
 ```
-
----
-
-## Features
-
-- **Core package**: `src/solice_api` handles SolisCloud authentication and data fetching.
-- **Zero external deps**: the exporter (`exporter.py`) only requires `prometheus_client`.
-- **File‑based polling**: reads all snapshots in `data/*.json` at configurable intervals.
-- **Dynamic metrics**: add or remove metrics by editing the `METRICS` map in `exporter.py`.
-- **Docker‑ready**: `docker-compose.yml` brings up exporter, Prometheus, and Grafana in one command.
-- **Dashboard model**: `solis-grafana-dashboard.json` contains a full Grafana dashboard definition for import.
 
 ---
 
 ## Prerequisites
 
-- **Python 3.11+** (managed via `pyproject.toml` / `uv`)
-- **Docker & Docker Compose**
-- **Git**
-
----
-
-## Quick Start
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/MuhammadRaffey/solice-api.git
-cd solice-api
-```
-
-### 2. Fetch inverter data snapshots
-
-Populate `data/` with JSON snapshots using the CLI script in the core package:
-
-```bash
-uv run get-data
-```
-
-_(Ensure your SolisCloud `config.json` is in the repo root with `key`/`secret` fields.)_
-
-### 3. Verify metrics locally
-
-```bash
-pip install --no-cache-dir prometheus_client
-python exporter.py
-```
-
-Open `http://localhost:8000/metrics` to see raw Prometheus output.
-
-### 4. Launch full monitoring stack
-
-```bash
-docker-compose up -d
-```
-
-- **Exporter**: `http://localhost:8000/metrics`
-- **Prometheus**: `http://localhost:9090`
-- **Grafana**: `http://localhost:3000` (default **admin/admin**)
+- **Python 3.8+**
+- **Docker & Docker Compose**
+- **UV** (optional; used for `get-data` script)
 
 ---
 
 ## Configuration
 
-| Environment Variable | Default | Description                           |
-| -------------------- | ------- | ------------------------------------- |
-| `EXPORT_PORT`        | `8000`  | Port for exporter HTTP server         |
-| `POLL_SEC`           | `30`    | Seconds between polling `data/*.json` |
-| `LOG_LEVEL`          | `INFO`  | Python logging level                  |
+1. **Copy** the example config into place:
+
+   ```bash
+   cp config.example.json config.json
+   ```
+
+2. **Edit** `config.json` to add your SolisCloud credentials:
+
+   ```json
+   {
+     "key": "YOUR_API_KEY",
+     "secret": "YOUR_API_SECRET"
+   }
+   ```
+
+3. (Optional) Adjust environment variables:
+   | Variable | Default | Description |
+   |--------------|---------|-------------------------------------------|
+   | `EXPORT_PORT`| `8000` | HTTP port for exporter metrics endpoint |
+   | `POLL_SEC` | `30` | Seconds between JSON directory polls |
+   | `LOG_LEVEL` | `INFO` | Python logging level |
 
 ---
 
-## Metrics
+## Quick Start
 
-All published metrics include two labels: `sn` (serial number) and `station` (user‑friendly name).
+### 1. Fetch inverter data
 
-| Metric                         | Description                     | Unit |
-| ------------------------------ | ------------------------------- | ---- |
-| `solis_inverter_ac_power_kw`   | Instant AC output power         | kW   |
-| `solis_inverter_grid_freq_hz`  | Grid frequency                  | Hz   |
-| `solis_inverter_temperature_c` | Inverter internal temperature   | °C   |
-| `solis_energy_today_kwh`       | Energy generated today          | kWh  |
-| `solis_energy_total_kwh`       | Total lifetime energy (counter) | kWh  |
-| `solis_battery_soc_percent`    | Battery state‑of‑charge         | %    |
-| `solis_battery_power_kw`       | Battery charge/discharge power  | kW   |
-| `solis_home_load_power_kw`     | Instant home load power         | kW   |
-| `solis_grid_import_today_kwh`  | Grid import today               | kWh  |
-| `solis_grid_export_today_kwh`  | Grid export today               | kWh  |
+Use the built‑in UV script to retrieve inverter snapshots:
+
+```bash
+uv run get-data
+```
+
+This populates `data/` with one JSON file per inverter.
+
+### 2. Run exporter locally
+
+```bash
+pip install prometheus_client
+python exporter.py
+```
+
+Visit http://localhost:8000/metrics to confirm metrics are exposed.
+
+### 3. Launch full stack with Docker Compose
+
+```bash
+docker-compose up -d
+```
+
+- **Exporter** → `:8000/metrics`
+- **Prometheus** → http://localhost:9090
+- **Grafana** → http://localhost:3000 (admin/admin)
+
+---
+
+## Metrics Published
+
+Each metric is labeled by `sn` (serial number) and `station`:
+
+| Name                           | Description                      | Unit |
+| ------------------------------ | -------------------------------- | ---- |
+| `solis_inverter_ac_power_kw`   | Instant AC output power          | kW   |
+| `solis_inverter_grid_freq_hz`  | Grid frequency                   | Hz   |
+| `solis_inverter_temperature_c` | Inverter temperature             | °C   |
+| `solis_energy_today_kwh`       | Energy generated today           | kWh  |
+| `solis_energy_total_kwh`       | Lifetime energy (counter)        | kWh  |
+| `solis_battery_soc_percent`    | Battery state of charge          | %    |
+| `solis_battery_power_kw`       | Battery power (charge/discharge) | kW   |
+| `solis_home_load_power_kw`     | Home load power                  | kW   |
+| `solis_grid_import_today_kwh`  | Grid import energy today         | kWh  |
+| `solis_grid_export_today_kwh`  | Grid export energy today         | kWh  |
 
 ---
 
 ## Grafana Dashboard
 
-1. Login to Grafana: `http://localhost:3000` (admin/admin)
-2. Go to **Dashboards → Import**
-3. Upload or paste `solis-grafana-dashboard.json`
-4. Select **Prometheus** as the data source
-5. Enjoy a full view of all `solis_*` metrics with station filtering.
+1. In Grafana UI → **Dashboards → Import**
+2. Upload `solis-grafana-dashboard.json`
+3. Select **Prometheus** as data source
+4. Enjoy your Solis metrics dashboard with station‑level filtering
 
 ---
 
-## Contributing
+## Development & Contributing
 
 1. Fork the repo
-2. Create a feature branch (`git checkout -b feature/xyz`)
-3. Commit your work (`git commit -m "Add new metric support"`)
-4. Push and open a PR
-5. We'll review and merge!
+2. Create a feature branch (`git checkout -b feature-name`)
+3. Commit your changes (`git commit -m "Add feature"`)
+4. Push and open a pull request
 
 ---
 
 ## License
 
-This project is licensed under the MIT License—see the [LICENSE](LICENSE) file for details.
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.
