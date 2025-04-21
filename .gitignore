@@ -8,6 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
-# Ignore all json files except solis‑grafana-dashboard.json
 *.json
-!solis‑grafana-dashboard.json
+!solis-grafana-dashboard.json
+!example.config.json
