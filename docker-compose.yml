@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  # ------------------------------------------------------------
+  # 1) JSON ➜ Prometheus exporter
+  # ------------------------------------------------------------
+  solice-exporter:
+    image: python:3.12-slim
+    container_name: solice-exporter
+    working_dir: /app
+    volumes:
+      # exporter entry‑point
+      - ./exporter.py:/app/exporter.py:ro
+      # JSON snapshots produced by `uv run get-data`
+      - ./data:/app/data:ro
+    # Install prometheus_client on‑the‑fly, then run exporter
+    command: >
+      sh -c "pip install --no-cache-dir prometheus_client &&
+             python exporter.py"
+    restart: unless-stopped
+    expose:
+      - "8000" # Prometheus scrapes inside the compose network
+
+  # ------------------------------------------------------------
+  # 2) Prometheus time‑series database
+  # ------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom_data:/prometheus # persists your TSDB
+    ports:
+      - "9090:9090" # http://localhost:9090
+    restart: unless-stopped
+    depends_on:
+      - solice-exporter
+
+  # ------------------------------------------------------------
+  # 3) Grafana dashboard
+  # ------------------------------------------------------------
+  grafana:
+    image: grafana/grafana-oss:10.4.2
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin # change in production!
+    volumes:
+      - grafana_data:/var/lib/grafana # persists dashboards & users
+    ports:
+      - "3000:3000" # http://localhost:3000
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+# ------------------------------------------------------------
+# Named volumes keep data between container restarts
+# ------------------------------------------------------------
+volumes:
+  prom_data:
+  grafana_data:

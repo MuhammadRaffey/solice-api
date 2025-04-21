@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 30s # how often to scrape targets
+  evaluation_interval: 30s
+
+scrape_configs:
+  # ------------------------------------------------------------------
+  # Scrape the JSON→Prometheus exporter that lives in the same Compose
+  # network (service name:  solice-exporter, port 8000)
+  # ------------------------------------------------------------------
+  - job_name: "solis"
+    metrics_path: "/metrics" # default, but explicit is clearer
+    static_configs:
+      - targets: ["solice-exporter:8000"]
