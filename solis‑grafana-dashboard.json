@@ -1,0 +1,191 @@
+{
+  "id": null,
+  "uid": "solis-system-overview",
+  "title": "Solis System Overview",
+  "tags": ["solis"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 3,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h"]
+  },
+  "editable": true,
+  "hideControls": false,
+  "graphTooltip": 0,
+  "templating": {
+    "list": [
+      {
+        "name": "station",
+        "label": "Station",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(solis_inverter_ac_power_kw, station)",
+        "refresh": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "options": [],
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Inverter AC Power (kW)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "id": 1,
+      "targets": [
+        {
+          "expr": "solis_inverter_ac_power_kw{job=\"solis\",station=~\"$station\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "kw" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Grid Frequency (Hz)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "id": 2,
+      "targets": [
+        {
+          "expr": "solis_inverter_grid_freq_hz{job=\"solis\",station=~\"$station\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "hz" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Inverter Temp (°C)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "id": 3,
+      "targets": [
+        {
+          "expr": "solis_inverter_temperature_c{job=\"solis\",station=~\"$station\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "celsius" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Energy Today (kWh)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "id": 4,
+      "targets": [
+        {
+          "expr": "solis_energy_today_kwh{job=\"solis\",station=~\"$station\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "kwh" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Lifetime Energy (kWh)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "id": 5,
+      "targets": [
+        {
+          "expr": "solis_energy_total_kwh_total{job=\"solis\",station=~\"$station\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "kwh" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Total Energy Created (kWh)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "id": 6,
+      "targets": [
+        {
+          "expr": "solis_energy_total_kwh_created{job=\"solis\",station=~\"$station\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "kwh" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Battery SoC (%)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 },
+      "id": 7,
+      "targets": [
+        {
+          "expr": "solis_battery_soc_percent{job=\"solis\",station=~\"$station\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Battery Power (kW)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 },
+      "id": 8,
+      "targets": [
+        {
+          "expr": "solis_battery_power_kw{job=\"solis\",station=~\"$station\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "kw" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Home Load Power (kW)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 32, "w": 12, "h": 8 },
+      "id": 9,
+      "targets": [
+        {
+          "expr": "solis_home_load_power_kw{job=\"solis\",station=~\"$station\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "kw" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Grid Import Today (kWh)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 32, "w": 12, "h": 8 },
+      "id": 10,
+      "targets": [
+        {
+          "expr": "solis_grid_import_today_kwh{job=\"solis\",station=~\"$station\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "kwh" }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Grid Export Today (kWh)",
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 40, "w": 12, "h": 8 },
+      "id": 11,
+      "targets": [
+        {
+          "expr": "solis_grid_export_today_kwh{job=\"solis\",station=~\"$station\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "kwh" }, "overrides": [] }
+    }
+  ],
+  "annotations": { "list": [] }
+}
