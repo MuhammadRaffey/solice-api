@@ -12,7 +12,7 @@ services:
       # exporter entry‑point
       - ./exporter.py:/app/exporter.py:ro
       # JSON snapshots produced by `uv run get-data`
-      - ./data:/app/data:ro
+      - solice_data:/app/data:ro
     # Install prometheus_client on‑the‑fly, then run exporter
     command: >
       sh -c "pip install --no-cache-dir prometheus_client &&
@@ -53,9 +53,29 @@ services:
     depends_on:
       - prometheus
 
+  # ------------------------------------------------------------
+  # 4) Run `uv run get-data` after 45 seconds
+  # ------------------------------------------------------------
+  solice-get-data-runner:
+    image: python:3.12-slim
+    container_name: solice-get-data-runner
+    working_dir: /app
+    # Mount entire project so pyproject.toml is available
+    volumes:
+      - ./:/app
+      - solice_data:/app/data
+      - ./config.json:/app/config.json:ro
+    command: >
+      sh -c "pip install --no-cache-dir . && \
+             while true; do get-data; sleep 45; done"
+    restart: unless-stopped
+    depends_on:
+      - solice-exporter
+
 # ------------------------------------------------------------
 # Named volumes keep data between container restarts
 # ------------------------------------------------------------
 volumes:
   prom_data:
   grafana_data:
+  solice_data:

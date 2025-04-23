@@ -4,7 +4,8 @@ import os
 import asyncio
 
 async def main():
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    # Use current working directory as project root for config and data paths
+    project_root = os.getcwd()
     
     # Define paths
     config_path = os.path.join(project_root, 'config.json')
